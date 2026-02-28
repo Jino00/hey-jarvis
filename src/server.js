@@ -50,6 +50,15 @@ function buildConfig() {
       },
     },
     gateway: {
+     channels: {
+      telegram: {
+        enabled: true,
+        botToken: process.env.TELEGRAM_BOT_TOKEN || "",
+        dmPolicy: "open",
+        allowFrom: ["*"],
+      },
+    },
+      
       mode: "local",
       port: GATEWAY_PORT,
       bind: "loopback",
