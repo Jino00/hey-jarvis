@@ -61,6 +61,9 @@ function buildConfig() {
       mode: "local",
       port: GATEWAY_PORT,
       bind: "loopback",
+      controlUi: {
+        allowedOrigins: ["https://hey-jarvis-production.up.railway.app"],
+      },
     },
   };
 }
