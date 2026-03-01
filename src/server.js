@@ -86,11 +86,9 @@ function ensureConfig() {
     const authDir = path.join(STATE_DIR, "agents", "main", "agent");
     fs.mkdirSync(authDir, { recursive: true });
     const authPath = path.join(authDir, "auth-profiles.json");
-    const authProfiles = {
-      profiles: {
-        "custom-api-fireworks-ai": {
-          apiKey: apiKey,
-        },
+        const authProfiles = {
+      "custom-api-fireworks-ai": {
+        apiKey: apiKey,
       },
     };
     fs.writeFileSync(authPath, JSON.stringify(authProfiles, null, 2));
