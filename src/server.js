@@ -101,10 +101,6 @@ function ensureConfig() {
         apiKey: process.env.GEMINI_API_KEY || "",
       },
     };
-      "google": {
-        apiKey: process.env.GEMINI_API_KEY || "",
-      },
-    };
     fs.writeFileSync(authPath, JSON.stringify(authProfiles, null, 2));
     console.log("[hey-jarvis] Generated auth-profiles for Fireworks AI.");
   }
@@ -147,8 +143,8 @@ function startGateway() {
   onboard.on("exit", (code) => {
     console.log(`[hey-jarvis] Onboard exited with code ${code}. Fixing auth token...`);
 
-  // Force auth token after onboard overwrites config
-  try {
+    // Force auth token after onboard overwrites config
+    try {
       const configData = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
       if (!configData.gateway) configData.gateway = {};
       if (!configData.gateway.auth) configData.gateway.auth = {};
@@ -180,7 +176,7 @@ function startGateway() {
     } catch (e) {
       console.error("[hey-jarvis] Failed to fix config:", e.message);
     }
-    
+
     console.log("[hey-jarvis] Starting gateway...");
 
     gatewayProcess = spawn(
