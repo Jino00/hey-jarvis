@@ -61,6 +61,10 @@ function buildConfig() {
       mode: "local",
       port: GATEWAY_PORT,
       bind: "loopback",
+      trustedProxies: ["127.0.0.1", "::1"],
+      auth: {
+        token: process.env.SETUP_PASSWORD || "openclaw2026",
+      },
       controlUi: {
         allowedOrigins: ["https://hey-jarvis-production.up.railway.app"],
       },
