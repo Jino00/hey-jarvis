@@ -140,7 +140,7 @@ function startGateway() {
   onboard.on("exit", (code) => {
     console.log(`[hey-jarvis] Onboard exited with code ${code}. Fixing auth token...`);
 
-    // Force auth token after onboard overwrites config
+  // Force auth token after onboard overwrites config
     try {
       const configData = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
       if (!configData.gateway) configData.gateway = {};
@@ -149,12 +149,7 @@ function startGateway() {
       if (!configData.gateway.trustedProxies) {
         configData.gateway.trustedProxies = ["127.0.0.1", "::1"];
       }
-      if (!configData.gateway.controlUi) {
-        configData.gateway.controlUi = {
-          allowedOrigins: ["https://hey-jarvis-production.up.railway.app"],
-        };
-      }
-     if (!configData.channels) {
+      if (!configData.channels) {
         configData.channels = {};
       }
       configData.channels.telegram = {
@@ -166,12 +161,15 @@ function startGateway() {
       configData.gateway.controlUi = {
         allowedOrigins: ["https://hey-jarvis-production.up.railway.app"],
       };
+      configData.gateway.security = {
+        pairingPolicy: "open",
+      };
       fs.writeFileSync(CONFIG_PATH, JSON.stringify(configData, null, 2));
       console.log("[hey-jarvis] Auth token and gateway config restored.");
     } catch (e) {
       console.error("[hey-jarvis] Failed to fix config:", e.message);
     }
-
+    
     console.log("[hey-jarvis] Starting gateway...");
 
     gatewayProcess = spawn(
