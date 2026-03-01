@@ -37,6 +37,7 @@ function buildConfig() {
       providers: {
         "custom-api-fireworks-ai": {
           baseUrl: "https://api.fireworks.ai/inference/v1",
+          apiKey: apiKey,
           models: [
             {
               id: "accounts/fireworks/models/glm-5",
@@ -67,21 +68,33 @@ function buildConfig() {
 function ensureConfig() {
   fs.mkdirSync(STATE_DIR, { recursive: true });
 
-  // Try to build config from env vars
   const config = buildConfig();
   if (config) {
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
     console.log("[hey-jarvis] Generated config from FIREWORKS_API_KEY.");
-    return;
-  }
-
-  // Fallback: copy template if no env var
-  if (!fs.existsSync(CONFIG_PATH)) {
+  } else if (!fs.existsSync(CONFIG_PATH)) {
     const tpl = path.join(__dirname, "..", "openclaw.json");
     if (fs.existsSync(tpl)) {
       fs.copyFileSync(tpl, CONFIG_PATH);
       console.log("[hey-jarvis] Copied default config template.");
     }
+  }
+
+  // Create auth-profiles for the agent
+  const apiKey = process.env.FIREWORKS_API_KEY;
+  if (apiKey) {
+    const authDir = path.join(STATE_DIR, "agents", "main", "agent");
+    fs.mkdirSync(authDir, { recursive: true });
+    const authPath = path.join(authDir, "auth-profiles.json");
+    const authProfiles = {
+      profiles: {
+        "custom-api-fireworks-ai": {
+          apiKey: apiKey,
+        },
+      },
+    };
+    fs.writeFileSync(authPath, JSON.stringify(authProfiles, null, 2));
+    console.log("[hey-jarvis] Generated auth-profiles for Fireworks AI.");
   }
 }
 
