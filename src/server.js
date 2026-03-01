@@ -161,9 +161,6 @@ function startGateway() {
       configData.gateway.controlUi = {
         allowedOrigins: ["https://hey-jarvis-production.up.railway.app"],
       };
-      configData.gateway.security = {
-        pairingPolicy: "open",
-      };
       fs.writeFileSync(CONFIG_PATH, JSON.stringify(configData, null, 2));
       console.log("[hey-jarvis] Auth token and gateway config restored.");
     } catch (e) {
