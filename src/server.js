@@ -156,15 +156,19 @@ function startGateway() {
       }
       // Re-add channels if missing
       if (!configData.channels) {
-        configData.channels = {
-          telegram: {
-            enabled: true,
-            botToken: process.env.TELEGRAM_BOT_TOKEN || "",
-            dmPolicy: "open",
-            allowFrom: ["*"],
-          },
-        };
+        configData.channels = {};
       }
+      configData.channels.telegram = {
+        enabled: true,
+        botToken: process.env.TELEGRAM_BOT_TOKEN || "",
+        dmPolicy: "open",
+        allowFrom: ["*"],
+      };
+      configData.channels.webchat = {
+        enabled: true,
+        dmPolicy: "open",
+        allowFrom: ["*"],
+      };
       fs.writeFileSync(CONFIG_PATH, JSON.stringify(configData, null, 2));
       console.log("[hey-jarvis] Auth token and gateway config restored.");
     } catch (e) {
