@@ -138,7 +138,40 @@ function startGateway() {
   onboard.stderr.on("data", (d) => console.error(`[onboard:err] ${d.toString().trim()}`));
 
   onboard.on("exit", (code) => {
-    console.log(`[hey-jarvis] Onboard exited with code ${code}. Starting gateway...`);
+    console.log(`[hey-jarvis] Onboard exited with code ${code}. Fixing auth token...`);
+
+    // Force auth token after onboard overwrites config
+    try {
+      const configData = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf8"));
+      if (!configData.gateway) configData.gateway = {};
+      if (!configData.gateway.auth) configData.gateway.auth = {};
+      configData.gateway.auth.token = process.env.SETUP_PASSWORD || "openclaw2026";
+      if (!configData.gateway.trustedProxies) {
+        configData.gateway.trustedProxies = ["127.0.0.1", "::1"];
+      }
+      if (!configData.gateway.controlUi) {
+        configData.gateway.controlUi = {
+          allowedOrigins: ["https://hey-jarvis-production.up.railway.app"],
+        };
+      }
+      // Re-add channels if missing
+      if (!configData.channels) {
+        configData.channels = {
+          telegram: {
+            enabled: true,
+            botToken: process.env.TELEGRAM_BOT_TOKEN || "",
+            dmPolicy: "open",
+            allowFrom: ["*"],
+          },
+        };
+      }
+      fs.writeFileSync(CONFIG_PATH, JSON.stringify(configData, null, 2));
+      console.log("[hey-jarvis] Auth token and gateway config restored.");
+    } catch (e) {
+      console.error("[hey-jarvis] Failed to fix config:", e.message);
+    }
+
+    console.log("[hey-jarvis] Starting gateway...");
 
     gatewayProcess = spawn(
       "openclaw",
