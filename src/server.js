@@ -49,8 +49,7 @@ function buildConfig() {
         },
       },
     },
-    gateway: {
-     channels: {
+    channels: {
       telegram: {
         enabled: true,
         botToken: process.env.TELEGRAM_BOT_TOKEN || "",
@@ -58,7 +57,7 @@ function buildConfig() {
         allowFrom: ["*"],
       },
     },
-      
+    gateway: {
       mode: "local",
       port: GATEWAY_PORT,
       bind: "loopback",
