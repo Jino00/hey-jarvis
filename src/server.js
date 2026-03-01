@@ -97,6 +97,9 @@ function ensureConfig() {
       "custom-api-fireworks-ai": {
         apiKey: apiKey,
       },
+      "google": {
+        apiKey: process.env.GEMINI_API_KEY || "",
+      },
     };
     fs.writeFileSync(authPath, JSON.stringify(authProfiles, null, 2));
     console.log("[hey-jarvis] Generated auth-profiles for Fireworks AI.");
@@ -159,6 +162,14 @@ function startGateway() {
       configData.gateway.controlUi = {
         allowedOrigins: ["https://hey-jarvis-production.up.railway.app"],
         dangerouslyDisableDeviceAuth: true,
+      };
+      // Memory search config
+      if (!configData.agents) configData.agents = {};
+      if (!configData.agents.defaults) configData.agents.defaults = {};
+      configData.agents.defaults.memorySearch = {
+        enabled: true,
+        provider: "gemini",
+        sources: ["memory", "sessions"],
       };
       fs.writeFileSync(CONFIG_PATH, JSON.stringify(configData, null, 2));
       console.log("[hey-jarvis] Auth token and gateway config restored.");
