@@ -93,10 +93,14 @@ function ensureConfig() {
     const authDir = path.join(STATE_DIR, "agents", "main", "agent");
     fs.mkdirSync(authDir, { recursive: true });
     const authPath = path.join(authDir, "auth-profiles.json");
-        const authProfiles = {
+    const authProfiles = {
       "custom-api-fireworks-ai": {
         apiKey: apiKey,
       },
+      "google": {
+        apiKey: process.env.GEMINI_API_KEY || "",
+      },
+    };
       "google": {
         apiKey: process.env.GEMINI_API_KEY || "",
       },
