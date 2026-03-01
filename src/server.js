@@ -109,6 +109,7 @@ function startGateway() {
         OPENCLAW_CONFIG_PATH: CONFIG_PATH,
         OPENCLAW_WORKSPACE_DIR:
           process.env.OPENCLAW_WORKSPACE_DIR || "/data/workspace",
+        FIREWORKS_API_KEY: process.env.FIREWORKS_API_KEY || "",
       },
       stdio: ["pipe", "pipe", "pipe"],
     }
