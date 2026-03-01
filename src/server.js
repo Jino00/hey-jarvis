@@ -154,8 +154,7 @@ function startGateway() {
           allowedOrigins: ["https://hey-jarvis-production.up.railway.app"],
         };
       }
-      // Re-add channels if missing
-      if (!configData.channels) {
+     if (!configData.channels) {
         configData.channels = {};
       }
       configData.channels.telegram = {
@@ -164,10 +163,9 @@ function startGateway() {
         dmPolicy: "open",
         allowFrom: ["*"],
       };
-      configData.channels.webchat = {
-        enabled: true,
-        dmPolicy: "open",
-        allowFrom: ["*"],
+      configData.gateway.controlUi = {
+        allowedOrigins: ["https://hey-jarvis-production.up.railway.app"],
+        openAccess: true,
       };
       fs.writeFileSync(CONFIG_PATH, JSON.stringify(configData, null, 2));
       console.log("[hey-jarvis] Auth token and gateway config restored.");
