@@ -99,68 +99,97 @@ function ensureConfig() {
 // --- Gateway Process Management ---
 
 function startGateway() {
-  console.log("[hey-jarvis] Starting OpenClaw gateway...");
+  console.log("[hey-jarvis] Running onboard before starting gateway...");
 
-  gatewayProcess = spawn(
-    "openclaw",
-    [
-      "gateway",
-      "run",
-      "--port",
-      String(GATEWAY_PORT),
-      "--bind",
-      "loopback",
-      "--allow-unconfigured",
-    ],
-    {
-      env: {
-        ...process.env,
-        OPENCLAW_STATE_DIR: STATE_DIR,
-        OPENCLAW_CONFIG_PATH: CONFIG_PATH,
-        OPENCLAW_WORKSPACE_DIR:
-          process.env.OPENCLAW_WORKSPACE_DIR || "/data/workspace",
-        FIREWORKS_API_KEY: process.env.FIREWORKS_API_KEY || "",
-      },
-      stdio: ["pipe", "pipe", "pipe"],
-    }
-  );
+  const apiKey = process.env.FIREWORKS_API_KEY;
+  const onboardArgs = [
+    "onboard",
+    "--non-interactive",
+    "--accept-risk",
+    "--auth-choice", "custom-api-key",
+    "--custom-base-url", "https://api.fireworks.ai/inference/v1",
+    "--custom-api-key", apiKey || "",
+    "--custom-model-id", "accounts/fireworks/models/glm-5",
+    "--custom-compatibility", "openai",
+    "--gateway-bind", "loopback",
+    "--skip-channels",
+    "--skip-skills",
+    "--skip-ui",
+  ];
 
-  gatewayProcess.stdout.on("data", (data) => {
-    const msg = data.toString().trim();
-    console.log(`[gateway] ${msg}`);
-    if (
-      msg.includes("listening") ||
-      msg.includes("ready") ||
-      msg.includes("Gateway")
-    ) {
-      gatewayReady = true;
-      console.log("[hey-jarvis] Gateway is ready.");
-    }
+  const onboard = spawn("openclaw", onboardArgs, {
+    env: {
+      ...process.env,
+      OPENCLAW_STATE_DIR: STATE_DIR,
+      OPENCLAW_CONFIG_PATH: CONFIG_PATH,
+      FIREWORKS_API_KEY: process.env.FIREWORKS_API_KEY || "",
+    },
+    stdio: ["pipe", "pipe", "pipe"],
   });
 
-  gatewayProcess.stderr.on("data", (data) => {
-    const msg = data.toString().trim();
-    if (msg) console.error(`[gateway:err] ${msg}`);
-    if (msg.includes("listening") || msg.includes("ready")) {
-      gatewayReady = true;
-    }
-  });
+  onboard.stdout.on("data", (d) => console.log(`[onboard] ${d.toString().trim()}`));
+  onboard.stderr.on("data", (d) => console.error(`[onboard:err] ${d.toString().trim()}`));
 
-  gatewayProcess.on("exit", (code) => {
-    console.log(`[hey-jarvis] Gateway exited with code ${code}`);
-    gatewayReady = false;
+  onboard.on("exit", (code) => {
+    console.log(`[hey-jarvis] Onboard exited with code ${code}. Starting gateway...`);
+
+    gatewayProcess = spawn(
+      "openclaw",
+      [
+        "gateway",
+        "run",
+        "--port",
+        String(GATEWAY_PORT),
+        "--bind",
+        "loopback",
+        "--allow-unconfigured",
+      ],
+      {
+        env: {
+          ...process.env,
+          OPENCLAW_STATE_DIR: STATE_DIR,
+          OPENCLAW_CONFIG_PATH: CONFIG_PATH,
+          OPENCLAW_WORKSPACE_DIR:
+            process.env.OPENCLAW_WORKSPACE_DIR || "/data/workspace",
+          FIREWORKS_API_KEY: process.env.FIREWORKS_API_KEY || "",
+        },
+        stdio: ["pipe", "pipe", "pipe"],
+      }
+    );
+
+    gatewayProcess.stdout.on("data", (data) => {
+      const msg = data.toString().trim();
+      console.log(`[gateway] ${msg}`);
+      if (msg.includes("listening") || msg.includes("ready") || msg.includes("Gateway")) {
+        gatewayReady = true;
+        console.log("[hey-jarvis] Gateway is ready.");
+      }
+    });
+
+    gatewayProcess.stderr.on("data", (data) => {
+      const msg = data.toString().trim();
+      if (msg) console.error(`[gateway:err] ${msg}`);
+      if (msg.includes("listening") || msg.includes("ready")) {
+        gatewayReady = true;
+      }
+    });
+
+    gatewayProcess.on("exit", (exitCode) => {
+      console.log(`[hey-jarvis] Gateway exited with code ${exitCode}`);
+      gatewayReady = false;
+      setTimeout(() => {
+        console.log("[hey-jarvis] Restarting gateway...");
+        startGateway();
+      }, 3000);
+    });
+
     setTimeout(() => {
-      console.log("[hey-jarvis] Restarting gateway...");
-      startGateway();
-    }, 3000);
+      if (!gatewayReady) {
+        gatewayReady = true;
+        console.log("[hey-jarvis] Gateway assumed ready (timeout).");
+      }
+    }, 15000);
   });
-
-  setTimeout(() => {
-    if (!gatewayReady) {
-      gatewayReady = true;
-      console.log("[hey-jarvis] Gateway assumed ready (timeout).");
-    }
-  }, 15000);
 }
 
 // --- Express App ---
