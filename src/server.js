@@ -37,7 +37,6 @@ function buildConfig() {
       providers: {
         "custom-api-fireworks-ai": {
           baseUrl: "https://api.fireworks.ai/inference/v1",
-          apiKey: apiKey,
           models: [
             {
               id: "accounts/fireworks/models/glm-5",
