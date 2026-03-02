@@ -153,11 +153,8 @@ function startGateway() {
       if (!configData.channels) {
         configData.channels = {};
       }
-      configData.channels.telegram = {
-        enabled: true,
-        botToken: process.env.TELEGRAM_BOT_TOKEN || "",
-        dmPolicy: "open",
-        allowFrom: ["*"],
+       configData.channels.telegram = {
+        enabled: false,
       };
       configData.gateway.controlUi = {
         allowedOrigins: ["https://hey-jarvis-production.up.railway.app"],
